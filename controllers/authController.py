@@ -3,7 +3,6 @@ import jwt
 import datetime
 from flask import request, jsonify
 from flask_sqlalchemy import SQLAlchemy
-
 from models.user import User
 
 db = SQLAlchemy()
@@ -20,7 +19,8 @@ class AuthController:
                 if (bcrypt.checkpw(password.encode('utf-8'), bytes(user.password, 'utf-8'))):
                     user_serialize = user.serialize
                     token = jwt.encode(
-                        {'user': user_serialize, 'exp': datetime.datetime.utcnow() + datetime.timedelta(days=7)}, 'Bearer')
+                        {'user': user_serialize, 'exp': datetime.datetime.utcnow() + datetime.timedelta(days=7)},
+                        'Bearer')
                     return jsonify({'user': user_serialize, 'token': token}), 200
                 raise
             except:
