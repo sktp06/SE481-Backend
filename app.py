@@ -40,8 +40,7 @@ def query_title():
     df_bm['rank'] = df_bm['bm25'].rank(ascending=False)
     df_bm = df_bm.nlargest(columns='bm25', n=10)
     df_bm = df_bm.drop(columns='bm25', axis=1)
-    return jsonify({'query': query, 'spell_corr': " ".join(spell_corr), 'contents': df_bm.to_dict('records')}), 200
-
+    return df_bm.to_dict('records')
 
 @app.route('/anime/description', methods=['POST'])
 def query_description():
@@ -53,8 +52,7 @@ def query_description():
     df_bm['rank'] = df_bm['bm25'].rank(ascending=False)
     df_bm = df_bm.nlargest(columns='bm25', n=10)
     df_bm = df_bm.drop(columns='bm25', axis=1)
-    return jsonify({'query': query, 'spell_corr': " ".join(spell_corr), 'contents': df_bm.to_dict('records')}), 200
-
+    return df_bm.to_dict('records')
 
 if __name__ == '__main__':
     app.run(debug=False)
