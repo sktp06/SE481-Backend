@@ -30,6 +30,7 @@ with app.app_context():
 app.register_blueprint(AuthBlueprint.auth_bp)
 app.register_blueprint(BookmarkBlueprint.bookmark_bp)
 
+
 @app.route('/anime/title', methods=['POST'])
 def query_title():
     query = request.args['query']
