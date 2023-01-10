@@ -7,6 +7,7 @@ from models.user import User
 
 db = SQLAlchemy()
 
+
 class AuthController:
     @staticmethod
     def auth():

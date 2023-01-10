@@ -2,6 +2,8 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS
 from sqlalchemy_utils.functions import database_exists, create_database
 from routes.auth_bp import AuthBlueprint
+from routes.bookmark_bp import BookmarkBlueprint
+
 from models.database import db
 from utils.bm25 import BM25
 from spellchecker import SpellChecker
@@ -40,7 +42,6 @@ def query_title():
     df_bm = df_bm.drop(columns='bm25', axis=1)
     return jsonify({'query': query, 'spell_corr': " ".join(spell_corr), 'contents': df_bm.to_dict('records')}), 200
 
-
 @app.route('/anime/description', methods=['POST'])
 def query_description():
     query = request.args['query']
@@ -52,6 +53,10 @@ def query_description():
     df_bm = df_bm.nlargest(columns='bm25', n=10)
     df_bm = df_bm.drop(columns='bm25', axis=1)
     return jsonify({'query': query, 'spell_corr': " ".join(spell_corr), 'contents': df_bm.to_dict('records')}), 200
+    
+
+  app.register_blueprint(AuthBlueprint.auth_bp)
+  app.register_blueprint(BookmarkBlueprint.bookmark_bp)
 
 
 if __name__ == '__main__':
