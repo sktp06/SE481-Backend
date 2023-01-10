@@ -33,7 +33,7 @@ app.register_blueprint(BookmarkBlueprint.bookmark_bp)
 
 @app.route('/anime/title', methods=['POST'])
 def query_title():
-    query = request.get_json()['input']
+    query = request.args['query']
     spell_corr = [spell.correction(w) for w in query.split()]
     score = bm25_title.transform(query)
     df_bm = pd.DataFrame(data=parsed_data)
@@ -41,11 +41,12 @@ def query_title():
     df_bm['rank'] = df_bm['bm25'].rank(ascending=False)
     df_bm = df_bm.nlargest(columns='bm25', n=10)
     df_bm = df_bm.drop(columns='bm25', axis=1)
-    return df_bm.to_dict('records')
+    return df_bm.to_json(orient='records')
+
 
 @app.route('/anime/description', methods=['POST'])
 def query_description():
-    query = request.get_json()['input']
+    query = request.args['query']
     spell_corr = [spell.correction(w) for w in query.split()]
     score = bm25_synopsis.transform(query)
     df_bm = pd.DataFrame(data=parsed_data)
@@ -53,7 +54,17 @@ def query_description():
     df_bm['rank'] = df_bm['bm25'].rank(ascending=False)
     df_bm = df_bm.nlargest(columns='bm25', n=10)
     df_bm = df_bm.drop(columns='bm25', axis=1)
-    return df_bm.to_dict('records')
+    return df_bm.to_json(orient='records')
+
+
+@app.route('/correction', methods=['GET'])
+def correction():
+    query = request.args['query']
+    spell_corr = [spell.correction(w) for w in query.split()]
+    if spell_corr[0] == None:
+        return 'No correction'
+    return jsonify(' '.join(spell_corr))
+
 
 if __name__ == '__main__':
     app.run(debug=False)
