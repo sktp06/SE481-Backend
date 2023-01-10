@@ -33,7 +33,7 @@ app.register_blueprint(BookmarkBlueprint.bookmark_bp)
 
 @app.route('/anime/title', methods=['POST'])
 def query_title():
-    query = request.args['query']
+    query = request.get_json()['input']
     spell_corr = [spell.correction(w) for w in query.split()]
     score = bm25_title.transform(query)
     df_bm = pd.DataFrame(data=parsed_data)
@@ -45,7 +45,7 @@ def query_title():
 
 @app.route('/anime/description', methods=['POST'])
 def query_description():
-    query = request.args['query']
+    query = request.get_json()['input']
     spell_corr = [spell.correction(w) for w in query.split()]
     score = bm25_synopsis.transform(query)
     df_bm = pd.DataFrame(data=parsed_data)
