@@ -2,6 +2,8 @@ from flask import Flask
 from flask_cors import CORS
 from sqlalchemy_utils.functions import database_exists, create_database
 from routes.auth_bp import AuthBlueprint
+from routes.bookmark_bp import BookmarkBlueprint
+
 from models.database import db
 
 app = Flask(__name__)
@@ -19,6 +21,7 @@ with app.app_context():
 
 class FlaskApp:
     app.register_blueprint(AuthBlueprint.auth_bp)
+    app.register_blueprint(BookmarkBlueprint.bookmark_bp)
 
 
 if __name__ == '__main__':
