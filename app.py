@@ -30,6 +30,7 @@ with app.app_context():
 app.register_blueprint(AuthBlueprint.auth_bp)
 app.register_blueprint(BookmarkBlueprint.bookmark_bp)
 
+
 @app.route('/anime/title', methods=['POST'])
 def query_title():
     query = request.args['query']
@@ -40,7 +41,7 @@ def query_title():
     df_bm['rank'] = df_bm['bm25'].rank(ascending=False)
     df_bm = df_bm.nlargest(columns='bm25', n=10)
     df_bm = df_bm.drop(columns='bm25', axis=1)
-    return jsonify({'query': query, 'spell_corr': " ".join(spell_corr), 'contents': df_bm.to_dict('records')}), 200
+    return df_bm.to_json(orient='records')
 
 
 @app.route('/anime/description', methods=['POST'])
@@ -53,7 +54,16 @@ def query_description():
     df_bm['rank'] = df_bm['bm25'].rank(ascending=False)
     df_bm = df_bm.nlargest(columns='bm25', n=10)
     df_bm = df_bm.drop(columns='bm25', axis=1)
-    return jsonify({'query': query, 'spell_corr': " ".join(spell_corr), 'contents': df_bm.to_dict('records')}), 200
+    return df_bm.to_json(orient='records')
+
+
+@app.route('/correction', methods=['GET'])
+def correction():
+    query = request.args['query']
+    spell_corr = [spell.correction(w) for w in query.split()]
+    if spell_corr[0] == None:
+        return 'No correction'
+    return jsonify(' '.join(spell_corr))
 
 
 if __name__ == '__main__':
