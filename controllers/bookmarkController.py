@@ -24,7 +24,6 @@ class BookmarkController:
             return jsonify({'message': 'The bookmark for userId {} is not existed'.format(userId)})
 
     @staticmethod
-    @staticmethod
     def addBookmark():
         # NOTE: body contain userId and serialNo
         try:
