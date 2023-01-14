@@ -52,7 +52,7 @@ class BookmarkController:
                 db.session.delete(bookmark)
                 db.session.commit()
             except:
-                return jsonify({'message': 'This bookmark is not existed'}), 404
+                return jsonify({'message': 'This bookmark is not existed'}), 500
             return jsonify({'message': 'The bookmark is deleted successfully'})
         except:
             return jsonify({'message': 'The request body required userId, and animeId'}), 400
