@@ -66,5 +66,10 @@ def correction():
     return jsonify(' '.join(spell_corr))
 
 
+@app.route('/suggestion', method=['GET'])
+def predict_anime():
+    return
+
+
 if __name__ == '__main__':
     app.run(debug=False)
