@@ -18,7 +18,7 @@ build/
 docs/_build/
 .vscode
 assets/
-
+.pkl
 # Coverage reports
 htmlcov/
 .coverage

@@ -3,6 +3,7 @@ from flask_cors import CORS
 from sqlalchemy_utils.functions import database_exists, create_database
 from routes.auth_bp import AuthBlueprint
 from routes.bookmark_bp import BookmarkBlueprint
+from routes.suggestion_bp import SuggestionBlueprint
 
 from models.database import db
 from utils.bm25 import BM25
@@ -29,6 +30,7 @@ with app.app_context():
 
 app.register_blueprint(AuthBlueprint.auth_bp)
 app.register_blueprint(BookmarkBlueprint.bookmark_bp)
+app.register_blueprint(SuggestionBlueprint.suggestion_bp)
 
 
 @app.route('/anime/title', methods=['POST'])
