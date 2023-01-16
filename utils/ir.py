@@ -39,14 +39,4 @@ def get_data(path):
     pickle.dump(df, open('assets/parsed_data.pkl', 'wb'))
     return df
 
-
-# def pre_process(s):
-#     ps = PorterStemmer()
-#     s = word_tokenize(s)
-#     s = [ps.stem(w) for w in s]
-#     s = ' '.join(s)
-#     s = s.translate(str.maketrans('', '', string.punctuation + u'\xa0'))
-#     return s
-
-
 df = get_data("assets/anime.json")

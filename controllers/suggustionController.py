@@ -18,7 +18,7 @@ db = SQLAlchemy()
 class SuggestionController:
     @staticmethod
     def getSuggestionByUserId():
-        parsed_data = pickle.load(open('C:/Users/saiparn/Desktop/IR/Backend/SE481-Backend/assets/parsed_data.pkl', 'rb'))
+        parsed_data = pickle.load(open('assets/parsed_data.pkl', 'rb'))
         rating = Bookmark.query.all()
         rating = Bookmark.serialize_list(rating)
         rating = pd.DataFrame(rating)
@@ -27,6 +27,8 @@ class SuggestionController:
 
         anime = parsed_data[anime_features]
         merged_df = anime.merge(rating, left_on='mal_id', right_on='anime', how='inner')
+        print(merged_df)
+
         genre_names = [
             'Action', 'Adventure', 'Comedy', 'Drama', 'Sci-Fi',
             'Game', 'Space', 'Music', 'Mystery', 'School', 'Fantasy',
@@ -54,38 +56,26 @@ class SuggestionController:
             return df
 
         def make_anime_feature(df):
-            # convert object to a numeric type, replacing Unknown with nan.
-
-            df['score_y'] = df['score_y'].apply(lambda x: np.nan if x == 'NaN' else float(x))
-
-
             # add genre category columns
             df = genre_to_category(df)
 
             return df
 
-        def make_user_feature(df):
-            # add user feature
-            df['rating_count'] = df.groupby('user')['anime'].transform('count')
-            # df['rating_mean'] = df.groupby('user')['rating'].transform('mean')
-            return df
-
         def preprocess(merged_df):
             merged_df = make_anime_feature(merged_df)
-            merged_df = make_user_feature(merged_df)
+            # merged_df = make_user_feature(merged_df)
             return merged_df
 
         merged_df = preprocess(merged_df)
         merged_df = merged_df.drop(['mal_id', 'genres'], axis=1)
         fit, blindtest = train_test_split(merged_df, test_size=0.2, random_state=0)
         fit_train, fit_test = train_test_split(fit, test_size=0.3, random_state=0)
-        features = ['score_y', 'popularity', 'members',
-                    'favorites','rank', 'rating_count']
+        features = ['popularity', 'members', 'favorites', 'rank']
 
         features += genre_names
         user_col = 'user'
         item_col = 'anime'
-        target_col = 'rating'
+        target_col = 'score_y'
 
         fit_train = fit_train.sort_values('user').reset_index(drop=True)
         fit_test = fit_test.sort_values('user').reset_index(drop=True)
@@ -95,33 +85,22 @@ class SuggestionController:
         fit_train_query = fit_train[user_col].value_counts().sort_index()
         fit_test_query = fit_test[user_col].value_counts().sort_index()
         blindtest_query = blindtest[user_col].value_counts().sort_index()
-        # model = lgb.LGBMRanker()
-        # print(fit_train[target_col])
-        # print(fit_test[target_col])
-        # model.fit(
-        #     fit_train[features],
-        #     fit_train[target_col],
-        #     group=fit_train_query,
-        #     eval_set=[(fit_test[features], fit_test[target_col])],
-        #     eval_group=[list(fit_test_query)],
-        #     eval_at=[1, 3, 5, 10],  # calc validation ndcg@1,3,5,10
-        #     early_stopping_rounds=100,
-        #     verbose=10
-        # )
+        model = lgb.LGBMRanker()
+        print(fit_train[target_col])
+        print(fit_test[target_col])
+        model.fit(
+            fit_train[features],
+            fit_train[target_col],
+            group=fit_train_query,
+            eval_set=[(fit_test[features], fit_test[target_col])],
+            eval_group=[list(fit_test_query)],
+            eval_at=[1, 3, 5, 10],  # calc validation ndcg@1,3,5,10
+            early_stopping_rounds=100,
+            verbose=10
+        )
 
-
-        # pickle.dump(model, open('assets/model.pkl', 'wb'))
-        model = pickle.load(open('assets/model.pkl','rb'))
-        result = model.predict(blindtest.iloc[:10][features])
-        print(result)
-
-
-         # feature imporance
-        # plt.figure(figsize=(10, 7))
-        # df_plt = pd.DataFrame({'feature_name': features, 'feature_importance': model.feature_importances_})
-        # df_plt.sort_values('feature_importance', ascending=False, inplace=True)
-        # sns.barplot(x="feature_importance", y="feature_name", data=df_plt)
-        # plt.title('feature importance')
+        pickle.dump(model, open('assets/model.pkl', 'wb'))
+        model.predict(blindtest.iloc[:10][features])
 
         def predict(user_df, top_k, anime, rating):
             user_anime_df = anime.merge(user_df, left_on='mal_id', right_on='anime')
@@ -149,14 +128,13 @@ class SuggestionController:
 
             print('---------- Rated ----------')
             user_df = user_df.merge(anime, left_on='anime', right_on='mal_id', how='inner')
-            for i, row in user_df.sort_values('rating', ascending=False).iterrows():
-                print(f'rating:{row["rating"]}: {row["title"]}')
-
+            for i, row in user_df.sort_values('score_x', ascending=False).iterrows():
+                print(f'score:{row["score_x"]}: {row["title"]}')
             return recommend_df
 
         user_id = 1
         user_df = rating.copy().loc[rating['user'] == user_id]
-        user_df = make_user_feature(user_df)
-        predict(user_df, 1, anime, rating)
+        # user_df = make_user_feature(user_df)
+        predict(user_df, 5, anime, rating)
 
 
